@@ -3,6 +3,12 @@ const mongoose = require('mongoose');
 
 const app = express();
 const Book = require('./models/book');
+const User = require('./models/user');
+
+const bookRoutes = require('./routes/book');
+const userRoutes = require('./routes/user');
+
+app.use(express.json());
 
 mongoose.connect('mongodb+srv://buh:mo0vss4rrJF00@cluster0.m3z0zyu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
   { useNewUrlParser: true,
@@ -16,5 +22,8 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   next();
 });
+
+app.use('/api/books', bookRoutes);
+app.use('/api/auth', userRoutes);
 
 module.exports = app;
