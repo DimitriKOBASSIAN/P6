@@ -5,15 +5,15 @@ const mongoose = require('mongoose');
 const app = express();
 const Book = require('./models/book');
 const User = require('./models/user');
+const path = require('path');
 
+app.use('/images', express.static(path.join(__dirname, 'images')));
 const bookRoutes = require('./routes/book');
 const userRoutes = require('./routes/user');
 
 app.use(express.json());
 
-mongoose.connect(process.env.MongoDB_login,
-  { useNewUrlParser: true,
-    useUnifiedTopology: true })
+mongoose.connect(process.env.MongoDB_login)
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 

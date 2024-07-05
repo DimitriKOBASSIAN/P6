@@ -1,24 +1,22 @@
 const Book = require('../models/book');
+const auth = require('../middleware/auth');
 
 exports.createBook = (req, res, next) => {
-    const bookObject = JSON.parse(req.body.book);
-    delete bookObject._id;
-    delete bookObject._userId;
-    const book = new Book({
-      ...bookObject,
-      userId: req.auth.userId,
-      imageUrl: `${req.protocol}://${req.get("host")}/images/${
-        req.file.filename
-      }`,
-      averageRating: bookObject.ratings[0].grade, // Initialized averageRating
-    });
-    book
-      .save()
-      .then(() => {
-        res.status(201).json({ message: "Book Saved !" });
+const bookObject = JSON.parse(req.body.book);
+delete bookObject._id;
+delete bookObject.userId;
+const book = new Book({
+    ...bookObject,
+    userId: req.auth.userId,
+    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+});
+
+
+  book.save()
+      .then(() => {res.status(201).json({ message: "Book Saved !" });
       })
       .catch((error) => res.status(400).json({ error }));
-  };
+};
 
 exports.getOneBook = (req, res, next) => {
     Book.findOne({
