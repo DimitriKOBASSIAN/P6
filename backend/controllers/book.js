@@ -99,39 +99,31 @@ exports.getBestRatedBooks  = async (req, res) => {
 };
 
 // Create a rating
-exports.createRating = (req, res) => {
-    try {
+exports.createRating = async (req, res) => {
+  try {
       const { rating } = req.body;
-      if (rating < 0 || rating > 5) {
-        return res
-          .status(400)
-          .json({ message: "The rating must be between 1 to 5" });
+      if (rating < 1 || rating > 5) {
+          return res.status(400).json({ message: "The rating must be between 1 to 5." });
       }
-  
-      const book =  Book.findById(req.params.id);
+
+      const book = await Book.findById(req.params.id);
       if (!book) {
-        return res.status(404).json({ message: "Book not found" });
+          return res.status(404).json({ message: "Book not found." });
       }
-  
-      const userIdArray = book.ratings.map((rating) => rating.userId);
-      if (userIdArray.includes(req.auth.userId)) {
-        return res.status(403).json({ message: "Not authorized" });
+
+      if (book.ratings.some(rating => rating.userId.toString() === req.auth.userId)) {
+          return res.status(403).json({ message: "User has already rated this book." });
       }
-  
-      book.ratings.push({ ...req.body, grade: rating });
-  
-      const totalGrades = book.ratings.reduce(
-        (sum, rating) => sum + rating.grade,
-        0
-      );
+
+      book.ratings.push({ userId: req.auth.userId, grade: rating });
+
+      const totalGrades = book.ratings.reduce((sum, { grade }) => sum + grade, 0);
       book.averageRating = (totalGrades / book.ratings.length).toFixed(1);
-  
-      book.save();
-      return res.status(201).json(book);
-    } catch (error) {
-      return res
-        .status(500)
-        .json({ error: "Error during rating creation" });
-    }
-  };
+
+      await book.save();
+      res.status(201).json({ message: "Rating added successfully.", book });
+  } catch (error) {
+      res.status(500).json({ error: "Error during rating creation." });
+  }
+};
 
