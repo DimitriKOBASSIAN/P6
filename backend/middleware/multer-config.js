@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, callback) => {
   !file.originalname.match(/\.(jpg|jpeg|png|webp)$/)
     ? callback(
-        new Error("Seuls les fichiers JPG, JPEG, PNG et WEBP sont autorisés !"),
+        new Error("Only JPG, JPEG, PNG et WEBP files are allowed !"),
         false
       )
     : callback(null, true);
@@ -56,12 +56,12 @@ module.exports.optimizeImage = (req, res, next) => {
     .resize({ width: 206, height: 260 })
     .toFile(outputFilePath)
     .then(() => {
-      console.log(`Image ${fileName} optimisée avec succès `);
+      console.log(`Image ${fileName} Successfully optimized`);
 
       fs.unlink(filePath, () => {
         req.file.path = outputFilePath;
         console.log(
-          `Image ${fileName} supprimée avec succès (format non optimisé inutile) `
+          ` ${fileName} Image successfully deleted `
         );
         next();
       });

@@ -14,8 +14,8 @@ const userRoutes = require('./routes/user');
 app.use(express.json());
 
 mongoose.connect(process.env.MongoDB_login)
-  .then(() => console.log('Connexion à MongoDB réussie !'))
-  .catch(() => console.log('Connexion à MongoDB échouée !'));
+  .then(() => console.log('MongoDB connected!'))
+  .catch(() => console.log('MongoDB connexion failed !'));
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
