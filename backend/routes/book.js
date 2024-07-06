@@ -5,10 +5,12 @@ const multer = require('../middleware/multer-config');
 
 const bookCtrl = require('../controllers/book');
 
-router.get('/', bookCtrl.getAllBooks);
+// routes mapping
+router.get('/', bookCtrl.getBooks);
 router.get('/:id', bookCtrl.getOneBook);
 router.get('/bestrating', bookCtrl.getBestRating)
 router.post('/', auth, multer, bookCtrl.createBook);
+router.post('/:id/rating', auth, bookCtrl.createRating);
 router.put('/:id', auth, multer, bookCtrl.modifyBook);
 router.delete('/:id', auth, bookCtrl.deleteBook);
 
