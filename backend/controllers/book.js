@@ -1,5 +1,4 @@
 const Book = require('../models/book');
-const auth = require('../middleware/auth');
 const fs = require('fs');
 
 // Create a new book
@@ -85,8 +84,22 @@ exports.getBooks = async (req, res) => {
     .catch((error) => res.status(404).json({ error }));
 };
 
+// Get the 3 best rated books
+exports.getBestRatedBooks  = async (req, res) => {
+  try {
+    const books =  await Book.find()
+      .sort({ averageRating: -1 })
+      .limit(3);
+    return res.status(200).json(books);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Error during getting best rating" });
+  }
+};
+
 // Create a rating
-exports.createRating = async (req, res) => {
+exports.createRating = (req, res) => {
     try {
       const { rating } = req.body;
       if (rating < 0 || rating > 5) {
@@ -95,7 +108,7 @@ exports.createRating = async (req, res) => {
           .json({ message: "The rating must be between 1 to 5" });
       }
   
-      const book = await Book.findById(req.params.id);
+      const book =  Book.findById(req.params.id);
       if (!book) {
         return res.status(404).json({ message: "Book not found" });
       }
@@ -113,7 +126,7 @@ exports.createRating = async (req, res) => {
       );
       book.averageRating = (totalGrades / book.ratings.length).toFixed(1);
   
-      await book.save();
+      book.save();
       return res.status(201).json(book);
     } catch (error) {
       return res
@@ -122,11 +135,3 @@ exports.createRating = async (req, res) => {
     }
   };
 
-// Get the 3 best rated books
-exports.getBestRating = (req, res, next) => {
-  Book.find()
-    .sort({ averageRating: -1 })
-    .limit(5)
-    .then((books) => res.status(200).json(books))
-    .catch((error) => res.status(404).json({ error }));
-};
