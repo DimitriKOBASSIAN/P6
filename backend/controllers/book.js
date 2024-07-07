@@ -1,7 +1,7 @@
 const Book = require('../models/book');
 const fs = require('fs');
 
-// Create a new book
+// Create a new book. The image is stored in the images folder and the url is saved in the database.
 exports.createBook = (req, res, next) => {
 const bookObject = JSON.parse(req.body.book);
 delete bookObject._id;
@@ -11,7 +11,6 @@ const book = new Book({
     userId: req.auth.userId,
     imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
 });
-
 
   book.save()
       .then(() => {res.status(201).json({ message: "Book Saved !" });
@@ -96,27 +95,28 @@ await Book.find()
 
 // Create a rating
 exports.createRating = async (req, res) => {
+  const { rating } = req.body;
+  const { userId } = req.auth;
+  const bookId = req.params.id;
+
+  if (rating < 0 || rating > 5) {
+    return res.status(400).json({ message: "Please rate the book from 1 to 5" });
+  }
+
+  const book = await Book.findById(bookId);
+  if (!book) {
+    return res.status(404).json({ message: "Book not found" });
+  }
+
+  const hasUserRatedBook = book.ratings.some(rating => rating.userId === userId);
+  if (hasUserRatedBook) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+
+  book.ratings.push({ ...req.body, grade: rating });
+  book.averageRating = (book.ratings.reduce((sum, rating) => sum + rating.grade, 0) / book.ratings.length).toFixed(1);
+
   try {
-    const { rating } = req.body;
-    if (rating < 0 || rating > 5) {
-      return res.status(400).json({ message: "Please rate the book from 1 to 5" });
-    }
-
-    const book = await Book.findById(req.params.id);
-    if (!book) {
-      return res.status(404).json({ message: "Book not found" });
-    }
-
-    const userIdArray = book.ratings.map((rating) => rating.userId);
-    if (userIdArray.includes(req.auth.userId)) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
-
-    book.ratings.push({ ...req.body, grade: rating });
-
-    const totalGrades = book.ratings.reduce((sum, rating) => sum + rating.grade, 0);
-    book.averageRating = (totalGrades / book.ratings.length).toFixed(1);
-
     await book.save();
     return res.status(201).json(book);
   } catch (error) {
