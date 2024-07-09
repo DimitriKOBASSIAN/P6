@@ -4,15 +4,25 @@ const bcrypt = require('bcrypt');
 
 
 exports.signup = (req, res, next) => {
-    bcrypt.hash(req.body.password, 10)
-        .then(hash => {
-        const user = new User({
-            email: req.body.email,
-            password: hash
-        });
-        user.save()
-            .then(() => res.status(201).json({ message: 'User created !' }))
-            .catch(error => res.status(400).json({ error }));
+    // Check if user already exists
+    User.findOne({ email: req.body.email })
+        .then(user => {
+            if (user) {
+                // User already exists
+                return res.status(409).json({ error: 'User already exists!' });
+            }
+            // No user found, proceed with signup
+            bcrypt.hash(req.body.password, 10)
+                .then(hash => {
+                    const newUser = new User({
+                        email: req.body.email,
+                        password: hash
+                    });
+                    newUser.save()
+                        .then(() => res.status(201).json({ error: 'User created !' }))
+                        .catch(error => res.status(400).json({ error }));
+                })
+                .catch(error => res.status(500).json({ error }));
         })
         .catch(error => res.status(500).json({ error }));
 };
