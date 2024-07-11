@@ -3,8 +3,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 const app = express();
-const Book = require('./models/book');
-const User = require('./models/user');
 const path = require('path');
 
 app.use('/images', express.static(path.join(__dirname, 'images')));

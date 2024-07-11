@@ -77,7 +77,7 @@ exports.deleteBook = (req, res, next) => {
       });
 };
 // Get all books
-exports.getBooks = async (req, res) => {
+exports.getBooks =  (_, res) => {
   Book.find()
     .then((books) => res.status(200).json(books))
     .catch((error) => res.status(404).json({ error }));
@@ -85,12 +85,12 @@ exports.getBooks = async (req, res) => {
 
 
 // Get the 3 best rated books
-exports.getBestRatedBooks  = async (req, res) => {
-await Book.find()
-  .sort({ averageRating: -1 })
-  .limit(3)
-  .then((books) => res.status(200).json(books))
-  .catch((error) => res.status(404).json({ error: "Error getting best rating" }));
+exports.getBestRatedBooks  =  (_, res) => {
+  Book.find()
+    .sort({ averageRating: -1 })
+    .limit(3)
+    .then((books) => res.status(200).json(books))
+    .catch((error) => res.status(404).json({ error: "Error getting best rating" }));
 };
 
 // Create a rating
